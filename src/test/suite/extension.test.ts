@@ -1,15 +1,34 @@
-import * as assert from 'assert';
+import { strict as assert } from 'assert';
+import * as path from 'path';
 
-// You can import and use all API from the 'vscode' module
-// as well as import your extension to test it
 import * as vscode from 'vscode';
-// import * as myExtension from '../../extension';
 
-suite('Extension Test Suite', () => {
-	vscode.window.showInformationMessage('Start all tests.');
+suite('Open a missing file', () => {
+	const missing = path.resolve(__dirname, '../../../MISSING.md');
+	const untitled = vscode.Uri.file(missing).with({ scheme: 'untitled' });
 
-	test('Sample test', () => {
-		assert.strictEqual(-1, [1, 2, 3].indexOf(5));
-		assert.strictEqual(-1, [1, 2, 3].indexOf(0));
+	setup(async () => {
+		await vscode.commands.executeCommand('workbench.action.closeAllEditors');
+	});
+
+	test('with functions', async () => {
+		const document = await vscode.workspace.openTextDocument(untitled);
+		const editor = await vscode.window.showTextDocument(document);
+		assert.equal(editor.document.fileName, missing);
+		assert.equal(vscode.window.activeTextEditor?.document.fileName, missing);
+	});
+
+	test('with commands', async () => {
+		await vscode.commands.executeCommand('vscode.open', untitled, undefined, path.basename(missing));
+		assert.equal(vscode.window.activeTextEditor?.document.fileName, missing);
+	});
+
+	test('with commands and edits', async () => {
+		await vscode.commands.executeCommand('vscode.open', untitled, undefined, path.basename(missing));
+		const editor = vscode.window.activeTextEditor!;
+		await editor.edit(it => it.insert(new vscode.Position(0, 0), 'PRESENT'));
+		assert.equal(editor.document.fileName, missing);
+		// trying to save this file proposes the name 'PRESENT.md'
+		// but i can't figure out how to determine that programmatically...
 	});
 });
