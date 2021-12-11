@@ -1,70 +1,31 @@
-# issue-vscode-open-untitled README
+# Issue: Saving an untitled document created with the vscode.open command forgets its intended file name
 
-This is the README for your extension "issue-vscode-open-untitled". After writing up a brief description, we recommend including the following sections.
+Creating an untitled document
+(from a file URI amended with the `untitled` scheme)
+results in different states depending on whether the document is created
+with the `vscode.open` command or the `openTextDocument` function.
 
-## Features
+I tried to reduce the problem to a failing test case and failed,
+but maybe these tests can still be useful for debugging.
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
+## Reproduction
 
-For example if there is an image subfolder under your extension project workspace:
+- Create an untitled URI for a new file (`vscode.Uri.file(path).with({scheme:'untitled'})`)
+- Open an editor for that URI with `openTextDocument`/`showTextDocument`
+- Type some text
+- Save the file
+- Notice that the save dialog starts with the `path` we had provided
 
-\!\[feature X\]\(images/feature-x.png\)
+- Create a new untitled URI for a new file
+- Open an editor for that URI with `vscode.commands.executeCommand('vscode.open', uri)`
+- Type some text
+- Save the file
 
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+## Expected behavior
 
-## Requirements
+The save dialog starts with the `path` we had provided,
+just like with the other method.
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
+## Actual behavior
 
-## Extension Settings
-
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
-
-For example:
-
-This extension contributes the following settings:
-
-* `myExtension.enable`: enable/disable this extension
-* `myExtension.thing`: set to `blah` to do something
-
-## Known Issues
-
-Calling out known issues can help limit users opening duplicate issues against your extension.
-
-## Release Notes
-
-Users appreciate release notes as you update your extension.
-
-### 1.0.0
-
-Initial release of ...
-
-### 1.0.1
-
-Fixed issue #.
-
-### 1.1.0
-
-Added features X, Y, and Z.
-
------------------------------------------------------------------------------------------------------------
-## Following extension guidelines
-
-Ensure that you've read through the extensions guidelines and follow the best practices for creating your extension.
-
-* [Extension Guidelines](https://code.visualstudio.com/api/references/extension-guidelines)
-
-## Working with Markdown
-
-**Note:** You can author your README using Visual Studio Code.  Here are some useful editor keyboard shortcuts:
-
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux)
-* Toggle preview (`Shift+CMD+V` on macOS or `Shift+Ctrl+V` on Windows and Linux)
-* Press `Ctrl+Space` (Windows, Linux) or `Cmd+Space` (macOS) to see a list of Markdown snippets
-
-### For more information
-
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
-
-**Enjoy!**
+The save dialog starts with the text we typed instead of the `path` we had provided.
